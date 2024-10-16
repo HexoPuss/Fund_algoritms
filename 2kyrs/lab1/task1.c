@@ -3,6 +3,80 @@
 #include <string.h>
 #include <ctype.h>
 
+int my_atoi(const char *str, int* num) {
+    int result = 0;
+    int sign = 1;
+
+    while (isspace(*str)) {
+        str++;
+    }
+
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+
+    while (1) {
+        if(isdigit(*str)){
+            int digit = *str - '0';
+
+            result = result * 10 + digit;
+            str++;
+        }else if(*str != '\0'){
+            return 1;
+        }else{
+            break;
+        }
+    }
+
+    *num = sign * result;
+    return 0;
+}
+
+
+double my_atof(const char *str) {
+    double result = 0.0;
+    double fraction = 0.0;
+    double divisor = 10.0;
+    int sign = 1;
+    int has_decimal = 0;
+
+    while (isspace(*str)) {
+        str++;
+    }
+
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+
+    // Обработка целой и дробной части
+    while (isdigit(*str) || (*str == '.' && !has_decimal)) {
+        if (*str == '.') {
+            has_decimal = 1;
+            str++;
+            continue;
+        }
+
+
+        if (!has_decimal) {
+            result = result * 10.0 + (*str - '0');
+        } else {
+            fraction += (*str - '0') / divisor;
+            divisor *= 10.0;
+        }
+        str++;
+    }
+
+    result += fraction;
+    result *= sign;
+
+    return result;
+}
 
 
 char digitToHexChar(int digit) {
@@ -34,76 +108,82 @@ int intpow(int x, int y){
     return x;
 }
 
+int caseH(int x){
+    if(x > 100 || x == 0){
+        printf("кратных чисел в пределах 100 нет\n");
+    }
+    for(int i = x; i <= 100; i += x){
+        printf("число %d делится на %d\n", i, x);
+    }
+}
+
+int caseP(int x){
+    if(x < 0){
+        return 0;
+    }
+
+    if(x == 0){
+        return -1;
+    }
+
+    for(int i = 2; i < x / 2; i++){
+        if(x % i == 0){
+            return 0;
+            break;
+        }
+    }
+
+    return 1;
+}
+
 int main(int argc, char *argv[]) {
     // Проверяем, что передано минимум 2 аргумента (программа + минимум 1 параметр)
     if (argc != 3) {
-        fprintf(stderr , "некорректное число флагов");
+        fprintf(stderr , "некорректное число аргументов");
         return 1;
     }
 
     int x = 0;
-    char flag = '0';
+    char flag = '\0';
 
     for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '-' || argv[i][0] == '/') {
-            if (strlen(argv[i]) > 1) {
-                flag = argv[i][1];
-            } else {
-                fprintf(stderr ,"Некорректный флаг: %sn", argv[i]);
-                return 1;
+        if(my_atoi(argv[i][0], &x)){
+            if(strlen(argv[i]) == 2){
+                flag = argv[1];
+            }else{
+                printf("неверная длинна флага");
             }
-        }
-        else if (is_number(argv[i])) {
-            x = atoi(argv[i]);
-        }
-        else {
-            fprintf(stderr,"Неизвестный аргумент: %sn", argv[i]);
-            return 1;
         }
     }
 
-    if (flag == '0') {
+    if (flag == '\0') {
         fprintf(stderr,"Флаг не был указан.n");
     }
+
+    int result;
 
     switch (flag) {
         case 'h':
             if(x < 0){
                 x = -x;
             }
-
             if(x > 100 || x == 0){
                 printf("кратных чисел в пределах 100 нет\n");
                 break;
             }
-
             for(int i = x; i <= 100; i += x){
                 printf("число %d делится на %d\n", i, x);
             }
             break;
         case 'p':
-            if(x < 0){
-                x = -x;
+            result = caseP(x);
+            if(result == 1){
+                printf("простое\n");
+            } else if(result == 0){
+                printf("составное\n");
+            } else{
+                print("это нуль");
             }
-            int breaking = 0;
-            if(x == 0){
-                printf("это же нуль!\n");
-            }
-
-            for(int i = 2; i < x / 2; i++){
-                if(x % i == 0){
-                    printf("число x - составное\n");
-                    breaking = 1;
-                    break;
-                }
-            }
-
-            if(breaking){
-                break;
-            }
-
-            printf("число x - простое\n");
-
             break;
         case 's':
             if(x == 0){
@@ -111,6 +191,7 @@ int main(int argc, char *argv[]) {
                 break;
             }
             if(x < 0){
+                printf("-");
                 x = -x;
             }
 
@@ -156,13 +237,14 @@ int main(int argc, char *argv[]) {
         case 'a':
             if(x < 0){
                 x = -x;
+                
             }
             int nsum = 0;
 
             for(int i = 0; i < x; i++){
                 nsum += i;
             }
-            printf("сумма натуральных чискл от 1 да %d - %d\n", x, nsum);
+            printf("сумма натуральных чисел от 1 да %d - %d\n", x, nsum);
             break;
         case 'f':
             if(x < 0){
