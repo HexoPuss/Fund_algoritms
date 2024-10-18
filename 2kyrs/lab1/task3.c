@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <ctype.h>
 
 int my_atoi(const char *str, int* num) {
     int result = 0;
@@ -34,7 +36,7 @@ int my_atoi(const char *str, int* num) {
     return 0;
 }
 
-double my_atof(const char *str, int* num) {
+int my_atof(const char *str, double* num) {
     double result = 0.0;
     double fraction = 0.0;
     double divisor = 10.0;
@@ -86,9 +88,7 @@ int compareFloats(double a, double b, double epsilon) {
 int solveQuadratic(double a, double b, double c, double epsilon, double* result) {
     double discriminant = b*b - 4*a*c;
     if (compareFloats(discriminant, 0, epsilon)) {
-        double root = -b / (2*a);
-        result[0] = root;
-        result[1] = root;
+        result[0] = -b / (2*a);
         return 1;
     } else if (discriminant > 0) {
         result[0] = (-b + sqrt(discriminant)) / (2*a);
@@ -113,7 +113,7 @@ int checkTriangle(double a, double b, double c, double epsilon) {
         compareFloats(b*b + c*c, a*a, epsilon)) {
         return 1;
     } else {
-        return 2;
+        return 0;
     }
 }
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
         }
         double vars[3];
         double a, b, c, epsilon;
-        if(my_atof(argv[2], &a)){
+        if(my_atof(argv[2], &epsilon)){
             printf("invalid number 2");
             return 2;
         }
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
             printf("invalid number 4");
             return 2;
         }
-        if(my_atof(argv[5], &epsilon)){
+        if(my_atof(argv[5], &a)){
             printf("invalid number 5");
             return 2;
         }
@@ -166,12 +166,12 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < 6; i++){
             printf("for %lfx^2 + %lfx + %lf: ", vars[(perm[i] / 100) - 1], vars[((perm[i] % 100) / 10) - 1], vars[(perm[i] % 10) - 1]);
             outcome = solveQuadratic(vars[(perm[i] / 100) - 1], vars[((perm[i] % 100) / 10) - 1], vars[(perm[i] % 10) - 1], epsilon, result);
-            if(outcome = 0){
+            if(outcome == 0){
                 printf("no real roots\n");
-            }else if(outcome = 1){
-                printf("one root - %lf", result[0]);
+            }else if(outcome == 1){
+                printf("one root - %lf\n", result[0]);
             }else{
-                printf("two roots - %lf, %lf", result[0], result[1]);
+                printf("two roots - %lf, %lf\n", result[0], result[1]);
             }
 
         }
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
 
         double a, b, c, epsilon;
 
-        if(my_atof(argv[2], &a)){
+        if(my_atof(argv[2], &epsilon)){
             printf("invalid number 2");
             return 2;
         }
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
             printf("invalid number 4");
             return 2;
         }
-        if(my_atof(argv[5], &epsilon)){
+        if(my_atof(argv[5], &a)){
             printf("invalid number 5");
             return 2;
         }
