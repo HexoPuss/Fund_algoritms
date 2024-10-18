@@ -5,86 +5,81 @@
 #include <string.h>
 #include <math.h>
 
-long double fact(int n){
-    if (n == 0 || n == 1) return 1.0;
-    long double result = 1.0;
-   for (int i = 2; i <= n; ++i) {
-       result *= i;
-   }
-    return (long double) result;
-}
+int my_atof(const char *str, long double* num) {
+    long double result = 0.0;
+    long double fraction = 0.0;
+    long double divisor = 10.0;
+    int sign = 1;
+    int has_decimal = 0;
 
-long double fracFact(int a, int b){
-    //a! / b!
-    long double res = 1;
-    if(a >= b){
-        for(int i = b + 1; i <= a; i++){
-            res *= i;
-        }
-    }else{
-        return 1.0 / fracFact(b, a);
+    while (isspace(*str)) {
+        str++;
     }
-    return res;
-}
 
-long double factfact(int n){
-    if(n == 0 || n == 1){
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+
+    while (isdigit(*str) || (*str == '.' && !has_decimal)) {
+        if (*str == '.') {
+            has_decimal = 1;
+            str++;
+            continue;
+        }
+
+
+        if (!has_decimal) {
+            result = result * 10.0 + (*str - '0');
+        } else {
+            fraction += (*str - '0') / divisor;
+            divisor *= 10.0;
+        }
+        str++;
+    }
+
+    if(*str != '\0'){
         return 1;
     }
-    int even = n % 2;
-    int res = 1;
-    for(int i = 2; i <= n; i++){
-        if (i % 2 == even){
-            res *= i;
-        }
-    }
+
+    result += fraction;
+    result *= sign;
+    *num = result;
+    return 0;
 }
 
-long double Calculation(long double calc(), long double eps, long double x, long double nStart){
-    long double prev;
-    long double res;
-    long double n = nStart;
-    prev = 0;
-    res = 0;
-    do{
-        prev = res;
-        res = prev + calc(n, x);
-        n++;
-    }while(fabs(res - prev) > eps);
 
+long double Calculation(long double func(), long double eps, long double intStart, long double intEnd){
+    long double i, res;
+    res = 0;
+    for(i = intStart; i < intEnd; i += eps){
+        res += func(i) * eps;
+    }
     return res;
 }
 
-long double sumA(int n, long double x){
-    return (pow(x, (long double) n)) / (fact(n));
-}
 
-long double sumB(int n,long double x){
-    return (pow(-1, (long double) n) * pow(x, ((long double) n) * 2.0) / (fact(2 * n)));
-}
-
-long double sumC(int intn, long double x){
-    long double n = (long double) n;
-    return (pow(3.0, 3 * n) * pow(fact(intn), 2) * (pow(x, 2 * n))) * fracFact(intn, 3 * intn);
-}
-
-long double sumD(int intn, long double x){
-    long double n = (long double) n;
-    return pow(-1, n) * factfact(intn * 2 - 1) * pow(x, 2 * n) / factfact(2 * n);
-}
-
-int isValidDouble(const char *str, long double *out_value) {
-    char *endptr;
-    errno = 0;
-    long double val = strtod(str, &endptr);
-
-    if (errno != 0) {
+long double integral_a(long double x) {
+    if(x == 0){
         return 0;
     }
-
-    *out_value = val;
-    return 1;
+    return log(1 + x) / x;
 }
+
+long double integral_b(long double x) {
+    return exp(-x * x / 2);
+}
+
+long double integral_c(long double x) {
+    return log(1 / (1 - x));
+}
+
+long double integral_d(long double x) {
+    return pow(x, x);
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -93,28 +88,16 @@ int main(int argc, char *argv[]) {
     }
 
     long double eps;
-    long double xVar;
-    if (!isValidDouble(argv[1], &eps)) {
-        fprintf(stderr, "Ошибка: '%s' не является допустимым вещественным числом.\n", argv[1]);
-        return 2;
-    }
-    if (!isValidDouble(argv[1], &xVar)) {
+    if (my_atof(argv[1], &eps)) {
         fprintf(stderr, "Ошибка: '%s' не является допустимым вещественным числом.\n", argv[1]);
         return 2;
     }
 
-    long double res = Calculation(sumA, eps, xVar, 0);
-    printf("f - %Lf\n", res);
-
-    /*res = Calculation(sumB, eps, xVar, 0);
-    printf("b - %Lf\n", res);
-
-    res = Calculation(sumC, eps, xVar, 0);
-    printf("c - %Lf\n", res);
-
-    res = Calculation(sumD, eps, xVar, 1);
-    printf("d - %Lf\n", res);*/
-    
+    printf("eps - %Lf\n", eps);
+    printf("a - %Lf\n", Calculation(integral_a, eps, 0, 1));
+    printf("b - %Lf\n", Calculation(integral_b, eps, 0, 1));
+    printf("c - %Lf\n", Calculation(integral_c, eps, 0, 1));
+    printf("d - %Lf\n", Calculation(integral_d, eps, 0, 1));
 
     return 0;
 }
