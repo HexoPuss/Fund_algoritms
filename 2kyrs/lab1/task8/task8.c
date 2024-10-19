@@ -3,6 +3,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE 1024
 
@@ -42,16 +45,39 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <input_file> <output_file>\n", argv[0]);
         return 1;
     }
+    struct stat stat1, stat2;
+
+
+    // Получение информации о первом файле
+    if (stat(argv[1], &stat1) == -1) {
+        fprintf(stderr, "Ошибка при вызове stat для первого пути");
+        return 1;
+    }
+
+    // Получение информации о втором файле
+    if (stat(argv[2], &stat2) == -1) {
+        fprintf(stderr, "Ошибка при вызове stat для второго пути");
+        return 1;
+    }
+
+    if (stat1.st_dev == stat2.st_dev && stat1.st_ino == stat2.st_ino) {
+        printf("Файлы идентичны (ссылаются на один и тот же inode).\n");
+        return 1;
+    } else {
+        printf("Файлы различны.\n");
+    }
+
+
 
     FILE *input_file = fopen(argv[1], "r");
     if (!input_file) {
-        perror("Unable to open input file");
+        fprintf(stderr, "Unable to open input file\n");
         return 1;
     }
 
     FILE *output_file = fopen(argv[2], "w");
     if (!output_file) {
-        perror("Unable to open output file");
+        fprintf(stderr, "Unable to open output file\n");
         fclose(input_file);
         return 1;
     }

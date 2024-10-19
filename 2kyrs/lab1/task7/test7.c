@@ -114,15 +114,16 @@ void convert_to_base8(char *output, char *lexeme) {
 
 int aFlag(const char *file, const char *file_out) {
     FILE *f = fopen(file, "r");
-    if (!f) {
-        perror("Failed to open input file");
+    printf("SDFSDF\n");
+    if (f == NULL) {
+        fprintf(stderr,"Failed to open input file");
         fclose(f);
         return 1;
     }
 
     FILE *fout = fopen(file_out, "w");
-    if (!fout) {
-        perror("Failed to open output file\n");
+    if (fout == NULL) {
+        fprintf(stderr,"Failed to open output file\n");
         fclose(fout);
         return 1;
     }

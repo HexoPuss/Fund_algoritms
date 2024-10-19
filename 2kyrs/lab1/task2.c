@@ -6,8 +6,6 @@
 #include <math.h>
 
 
-
-
 double fact(int n) {
        if (n == 0 || n == 1) return 1.0;
        double result = 1.0;
@@ -222,7 +220,7 @@ double Calculation(double calc(), double eps, char flag, double nStart){
 //функция дихотомии
 double dihotomya(double a, double b, double func(), double eps){
     double x = (a + b) / 2.0;
-    while((func(b) - func(a)) / 2.0 > eps){
+    while((b - a) / 2.0 > eps){
         x = (a + b) / 2.0;
         double fx = func(x);
 
@@ -298,7 +296,7 @@ void piResult(double eps, double res[]){
 
     res[1] = 4 * Calculation(piCalc, eps, 's', 1);
 
-    res[2] = dihotomya(2.0, 5.0, piEq, eps);
+    res[2] = dihotomya(3.0, 3.5, piEq, eps);
 }
 
 
