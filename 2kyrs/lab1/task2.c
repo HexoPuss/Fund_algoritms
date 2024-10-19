@@ -1,368 +1,356 @@
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <ctype.h>
-#include <string.h>
-#include <math.h>
 
+#define PI 3.1415
+#define MAX_INTERATION 47
 
-double fact(int n) {
-       if (n == 0 || n == 1) return 1.0;
-       double result = 1.0;
-       for (int i = 2; i <= n; ++i) {
-           result *= i;
-       }
-       return result;
-}
-
-double comb(int m, int k) {
-    if (k < 0 || k > m) return 0.0;
-    if (k == 0 || k == m) return 1.0;
-
-    // Используем свойство C(m, k) = C(m, m - k)
-    if (k > m - k) k = m - k;
-
-    double result = 1.0;
-    for (int i = 1; i <= k; ++i) {
-        result *= (double)(m - (k - i)) / (double)i;
-        
+long double BinPow(long double a, int n) {
+    long double res = 1;
+    while (n != 0) {
+        if (n & 1)
+            res = res * a;
+        a = a * a;
+        n >>= 1;
     }
-    return result;
-}
-
-double comb1(int m, int k) {
-    if (k < 0 || k > m) return 0.0;
-    if (k == 0 || k == m) return 1.0;
-    printf("%d, %d\n", m, k);
-    return exp(lgamma((double)(m + 1)) - (lgamma((double)(k + 1)) + lgamma((double)(m - k + 1))));
-}
-
-//лимиты
-
-double expLim(double n){
-    if(n == 0){
-        return 0;
-    }
-    return pow(1 + (1.0 / n), n);
-}
-
-double piLim(double n){
-    if(n == 0){
-        return 0;
-    }
-    return (pow(pow(2, n) * fact(n), 4)) / (n * pow(fact(2 * n), 2));
-}
-
-double ln2Lim(double n){
-    if(n == 0){
-        return 0;
-    }
-    return n * (pow(2 , 1 / n) - 1);
-}
-
-double sqrt2Lim(double n){
-    if(n == 0.0){
-        return -0.5;
-    }
-    double xPrev = sqrt2Lim(n - 1);
-    return xPrev - (pow(xPrev, 2) / 2.0) + 1;
-}
-
-double gammLim(int m, double eps){
-    double result = 0.0;
-
-    for (int k = 1; k <= m; k++) {
-        double C = comb(m, k);          // C(m, k)
-        double log_fact = lgamma(k + 1); // log(k!) 
-        double sign = pow(-1, k); // (-1)^k
-
-        double step = sign * (C / (double)k) * log_fact;
-        result += step;
-    }
-    return result;
-}
-
-
-
-double limForGammaEq(double t){
-
-    int simpNums[((int) t) + 1];
-    for (int i = 1; i <= t; i++){
-        simpNums[i] = i;
-    }
-
-
-    for(int i = 2; i <= t / 2; i++){
-        for(int j = 1; j <= t; j++){
-            if(simpNums[j] % i != 0){
-                simpNums[j] = 0;
-            }
-        }
-    }
-
-    double mult = 1;
-
-    for(int i = 2; i <= t; i++){
-        if (simpNums[i] != 0){
-            mult *= (((double) simpNums[i]) - 1) / (simpNums[i]);
-        }
-    }
-
-    return log(t) * mult;
-}
-
-double limit1(double limFunc(), double eps){
-    double res = limFunc(1.0);
-    double prev = limFunc(0.0);
-    for(double n = 2.0; fabs(res - prev) > eps; n++){
-        printf(" N - %lf, || tt - %lf\n", n, res - prev);
-        prev = res;
-        res = limFunc(n);
-    }
-    printf("HOHO\n");
     return res;
 }
 
-double limit(double limFunc(), double eps){
-    double n = 1.0;
-    double current = limFunc(n);
-    int maxSteps = 10;
-    while (1)
-    {
-        n += 1;
-        double next = limFunc(n);
-
-        if(fabs(next - current) <= eps){
-            return next;
-        }
-
-        if(n >= maxSteps){
-            return next;
-        }
-
-        current = next;
-    }
-    
+long double factorial(int n) {
+	long double res = 1.0;
+	for (int i = 2; i <= n; i++) {
+		res *= i;
+	}
+	return res;
 }
 
-//уравнения функций)
-
-double expEq(double x){
-    return log(x) - 1.0;
+// 1.1
+long double ELimit(double epsilon) {
+	long double e = 0.0;
+	int n = 1;
+	while (1) {
+		long double term = BinPow(1.0 + 1.0 / n, n);
+		if (fabs(term - e) < epsilon) {
+			break;
+		}
+		e = term;
+		n++;
+	}
+	return e;
 }
 
-double piEq(double x){
-    printf("PI - %lf\n", cos(x) + 1.0);
-    return cos(x) + 1.0;
+// 1.2
+long double ESeries(double epsilon) {
+	long double e = 1.0;
+	long double term = 1.0;
+	int n = 1;
+	while (fabs(term) > epsilon) {
+		term /= n;
+		e += term;
+		n++;
+	}
+	return e;
 }
 
-double ln2Eq(double x){
-    return exp(x) - 2;
+// 1.3
+long double EEq(double epsilon) {
+	long double x = 2.0;
+	while (fabs(log(x) - 1.0) > epsilon) {
+		x = x - (log(x) - 1.0) / (1.0 / x);
+	}
+	return x;
 }
 
-double sqrt2Eq(double x){
-    return pow(x, 2.0) - 2;
+// 2.1
+long double PiLimit(double epsilon) {
+	long double pi = 4;
+	long double prev_pi = 0.0;
+	int n = 1;
+	while (fabs(pi - prev_pi) > epsilon) {
+		prev_pi = pi;
+		pi *= 4.0 * ((n + 1) * n) / BinPow(2 * n + 1, 2);
+		n++;
+	}
+
+	return pi;
 }
 
-double gammEq(double x, double eps){
-    return exp(-x) - limit(limForGammaEq, eps);
+// 2.2
+long double PiSeries(double epsilon) {
+	long double pi = 1.0;
+	long double term = 1.0;
+	int n = 2;
+	while (fabsl(term) > epsilon) {
+		term = ((n - 1) % 2 ? -1.0 : 1.0) / (2 * n - 1);
+		pi += term;
+		n++;
+	}
+	return pi * 4;
 }
 
-
-
-//ряды & произведения
-
-double expCalc(double n){
-    return 1.0 / fact(n);
+// 2.3
+long double PiEq(double epsilon) {
+	long double x = 3.0;
+	while (fabsl(cos(x) + 1.0) > epsilon) {
+		x = x - (cos(x) + 1.0) / (-sin(x));
+	}
+	return x;
 }
 
-double piCalc(double n){
-    return (pow(-1, n-1)) / (2 * n - 1);
+// 3.1
+long double Ln2Limit(double epsilon) {
+	long double ln2 = 0.0;
+	long double term;
+	int n = 1;
+	while (1) {
+		term = n * (powl(2, 1.0 / n) - 1);
+		if (fabsl(term - ln2) < epsilon) {
+			break;
+		}
+		ln2 = term;
+		n++;
+	}
+	return ln2;
 }
 
-double ln2Calc(double n){
-    return (pow(-1, n-1)) / (n);
-}
+// 3.2
+long double Ln2Series(double epsilon) {
+	long double ln2 = 0.0;
+    long double term = 1.0;
+    int sign = 1;
+    int n = 1;
 
-double sqrt2Calc(double k){
-    return pow(2, pow(2, -k));
-}
-
-double gammCalc(double k){
-    return (1.0 / (pow((double) (int) (k), 2))) - (1.0 / k);
-}
-
-double Calculation(double calc(), double eps, char flag, double nStart){
-    double prev;
-    double res;
-    double n = nStart;
-    if(flag == 's'){
-        prev = 0;
-        res = 0;
-        do{
-            prev = res;
-            res = prev + calc(n);
-            n++;
-        }while(fabs(res - prev) > eps);
-    }else{
-        prev = 1;
-        res = 1;
-        do{
-            prev = res;
-            res = prev * calc(n);
-            n++;
-        }while(fabs(res - prev) > eps);
-    }
-
-    return res;
-}
-
-//функция дихотомии
-double dihotomya(double a, double b, double func(), double eps){
-    double x = (a + b) / 2.0;
-    while((b - a) / 2.0 > eps){
-        x = (a + b) / 2.0;
-        double fx = func(x);
-
-        if (fx == 0.0){
-            break;
-        }
-
-        if(func(a) * fx < 0){
-            b = x;
-        } else {
-            a = x;
-        }
-    }
-
-    return x;
-}
-
-double dihotomyaForGamma(double a, double b, double func(), double eps){
-    double x = (a + b) / 2.0;
-    while((b - a) / 2.0 > eps){
-        x = (a + b) / 2.0;
-        double fx = func(x, eps);
-
-        if (fx == 0.0){
-            break;
-        }
-
-        if(func(a, eps) * fx < 0){
-            b = x;
-        } else {
-            a = x;
-        }
+    while (fabsl(term) > epsilon) {
+        term = 1.0 / n;
+        ln2 += sign * term;
+        sign = -sign;
+        n++;
     }
 
-    return x;
+    return ln2;
 }
 
-
-
-
-
-// Функция для проверки, является ли строка валидным вещественным числом
-int isValidDouble(const char *str, double *out_value) {
-    char *endptr;
-    errno = 0; // Сбрасываем errno перед вызовом
-    double val = strtod(str, &endptr);
-
-    // Проверяем, произошла ли ошибка при конвертации
-    if (errno != 0) {
-        return 0;
-    }
-
-    *out_value = val;
-    return 1;
+// 3.3
+long double Ln2Eq(double epsilon) {
+	long double x = 1.0;
+	while (fabsl(exp(x) - 2.0) > epsilon) {
+		x = x - (exp(x) - 2.0) / exp(x);
+	}
+	return x;
 }
 
-
-
-
-//функции вычислений
-void expResult(double eps, double res[]){
-
-    res[0] = limit(expLim, eps);
-    
-    res[1] = Calculation(expCalc, eps, 's', 0);
-
-    res[2] = dihotomya(1.0, 4.0, expEq, eps);
+// 4.1
+long double Sqrt2Limit(double epsilon) {
+	long double sqrt2 = -0.5;
+	long double next = sqrt2 - (sqrt2 * sqrt2) / 2 + 1;
+	while (fabs(sqrt2 - next) > epsilon) {
+		sqrt2 = next;
+		next = sqrt2 - (sqrt2 * sqrt2) / 2 + 1;
+	}
+	return next;
 }
 
-
-void piResult(double eps, double res[]){
-    res[0] = limit(piLim, eps);
-
-    res[1] = 4 * Calculation(piCalc, eps, 's', 1);
-
-    res[2] = dihotomya(3.0, 3.5, piEq, eps);
+// 4.2
+long double Sqrt2Series(double epsilon) {
+	long double sqrt2 = 1.0; // Start value
+	long double term;
+	int k = 2;
+	while (1) {
+		term = powl(2, powl(2, -k));
+		sqrt2 *= term;
+		if (fabsl(term - 1) < epsilon) {
+			break;
+		}
+		k++;
+	}
+	return sqrt2;
 }
 
-
-
-void ln2Result(double eps, double res[]){
-    res[0] = limit(ln2Lim, eps);
-
-    res[1] = Calculation(ln2Calc, eps, 's', 1);
-
-    res[2] = dihotomya(0.0, 1.0, ln2Eq, eps);
+// 4.3
+long double Sqrt2Eq(double epsilon) {
+	long double x = 1.0;
+	while (fabsl(x * x - 2.0) > epsilon) {
+		x -= (x * x - 2.0) / (2 * x);
+	}
+	return x;
 }
 
+// 5.1
+long double GammaLimit(double epsilon) {
+	long double gamma = 0.0;
+	long double prev_gamma = 0.0;
+	int m = 1;
+	long double fact_m = 1;
+	while (1) {
+		long double sum = 0.0;
+		long double fact_k = 1;
+		for (int k = 1; k <= m; k++) {
+			fact_k *= k;
+			long double binom = fact_m / (fact_k * factorial(m - k));
+			sum += binom * (k % 2 ? -1.0 : 1.0) * log(fact_k) / k;
 
-void sqrt2Result(double eps, double res[]){
-    res[0] = limit(sqrt2Lim, eps);
-    
-    res[1] = Calculation(sqrt2Calc, eps, 'm', 2);
+		}
 
-    res[2] = dihotomya(1.0, 2.0, sqrt2Eq, eps);
+		if (m == 1) {
+			prev_gamma = -100;
+		} else {
+			prev_gamma = gamma;
+		}
+
+		gamma = sum;
+
+		if (m >= MAX_INTERATION) {
+			return gamma;
+		}
+
+		if (fabsl(gamma - prev_gamma) < epsilon) {
+			break;
+		}
+		m++;
+		fact_m *= m;
+	}
+
+	return gamma;
 }
 
+// 5.2
+long double GammaSeries(double epsilon) {
+	long double gamma = 0;
+	long double term = 0;
+	long double gamma_prev;
+	int k = 2;
 
-void gammResult(double eps, double res[]){
-    res[0] = limit(gammLim, eps);
+	while (1) {
+		gamma_prev = gamma;
+		term = (1.0 / pow(floor(sqrt(k)), 2)) - (1.0 / k);
+		gamma += term;
+		if (fabsl(term) < epsilon && term != 0) {
+			break;
+		}
 
-    res[1] = -((pow(3.14159, 2)) / 6) + Calculation(gammCalc, eps, 'm', 2);
+		k++;
+	}
 
-    res[2] = dihotomyaForGamma(-100.0, 100.0, gammEq, eps);
+	return gamma - PI * PI / 6.0;
 }
 
+// 5.3
+bool IsPrime(int n) {
+	if (n < 2) {
+		return false;
+	}
+	for (int i = 2; i <= sqrt(n); i++) {
+		if (n % i == 0) {
+			return false;
+		}
+	}
+	return true;
+}
 
+double ProdForGammEq(int t) {
+	double product = 1.0;
+	for (int p = 2; p <= t; p++) {
+		if (IsPrime(p)) {
+			product *= (double)(p - 1) / p;
+		}
+	}
+	return product;
+}
 
+long double GammaEq(double epsilon) {
+	double t = 2.0; 
+	double prev_x = 0.0;
 
+	for (int i = 0; i < 1000; i++) {
+		double product = ProdForGammEq((int)t);
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Использование: %s <вещественное число>n", argv[0]);
-        return 1;
-    }
+		double current_x = log(t) * product;
 
-    double eps;
-    if (!isValidDouble(argv[1], &eps)) {
-        fprintf(stderr, "Ошибка: '%s' не является допустимым вещественным числом.n", argv[1]);
-        return 2;
-    }
+		if (fabs(current_x - prev_x) < epsilon) {
+			return current_x;
+		}
 
-    if(eps == 0.0){
-        fprintf(stderr ,"слишком маленькая епсилон\n");
-        return 4;
-    }
-    
-    double Result[3];
-    expResult(eps, Result);
-    printf("exp - %lf %lf %lf\n", Result[0], Result[1], Result[2]);
+		prev_x = current_x;
+		t += 1;
+	}
 
-    piResult(eps, Result);
-    printf("pi - %lf %lf %lf\n", Result[0], Result[1], Result[2]);
+	return prev_x;
+}
 
-    ln2Result(eps, Result);
-    printf("ln(2) - %lf %lf %lf\n", Result[0], Result[1], Result[2]);
+double MyStrtod(const char* str, char** end) {
+	while (isspace((unsigned char)*str)) {
+		str++;
+	}
 
-    sqrt2Result(eps, Result);
-    printf("sqrt(2) - %lf %lf %lf\n", Result[0], Result[1], Result[2]);
+	int sign = 1;
+	if (*str == '-') {
+		sign = -1;
+		str++;
+	} else if (*str == '+') {
+		str++;
+	}
 
-    gammResult(eps, Result);
-    printf("gamma - %lf %lf %lf\n", Result[0], Result[1], Result[2]);
+	double integer_part = 0.0;
+	while (isdigit((unsigned char)*str)) {
+		integer_part = integer_part * 10 + (*str - '0');
+		str++;
+	}
 
-    return 0;
+	double fraction_part = 0.0;
+	if (*str == '.') {
+		str++;
+		double divisor = 10.0;
+		while (isdigit((unsigned char)*str)) {
+			fraction_part += (*str - '0') / divisor;
+			divisor *= 10;
+			str++;
+		}
+	}
+
+	double result = sign * (integer_part + fraction_part);
+
+	if (end) {
+		*end = (char*)str;
+	}
+
+	return result;
+}
+
+int main(int argc, char* argv[]) {
+	if (argc != 2) {
+		printf("Your programm must start with: %s <epsilon>", argv[0]);
+		return 1;
+	}
+
+	char* end;
+	double epsilon = MyStrtod(argv[1], &end);
+	if (*end != '\0') {
+		fprintf(stderr, "Incorrect epsilon.\n");
+		return 1;
+	}
+
+	printf("e Const\n");
+	printf("\tlimit: %Lf\n", ELimit(epsilon));
+	printf("\trow: %Lf\n", ESeries(epsilon));
+	printf("\tEq: %Lf\n", EEq(epsilon));
+	printf("pi Const\n");
+	printf("\tlimit: %Lf\n", PiLimit(epsilon));
+	printf("\trow: %Lf\n", PiSeries(epsilon));
+	printf("\tEq: %Lf\n", PiEq(epsilon));
+	printf("ln of 2\n");
+	printf("\tlimit: %Lf\n", Ln2Limit(epsilon));
+	printf("\trow: %Lf\n", Ln2Series(epsilon));
+	printf("\tEq: %Lf\n", Ln2Eq(epsilon));
+	printf("sqrt of 2\n");
+	printf("\tlimit: %Lf\n", Sqrt2Limit(epsilon));
+	printf("\trow: %Lf\n", Sqrt2Series(epsilon));
+	printf("\tEq: %Lf\n", Sqrt2Eq(epsilon));
+	printf("Gamma\n");
+	printf("\tlimit: %Lf\n", GammaLimit(epsilon));
+	printf("\trow: %Lf\n", GammaSeries(epsilon));
+	printf("\tEq: %Lf\n", GammaEq(epsilon));
+
+	return 0;
 }

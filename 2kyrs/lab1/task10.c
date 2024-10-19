@@ -115,7 +115,7 @@ int main() {
     printf("Введите числа (введите 'Stop' для завершения):\n");
     while (1) {
         fgets(numStr, MAX_LENGTH, stdin);
-        numStr[strcspn(numStr, "\n")] = '\0'; // Remove newline character
+        numStr[strcspn(numStr, "\n")] = '\0';
 
         if (strcmp(numStr, "Stop") == 0)
             break;
