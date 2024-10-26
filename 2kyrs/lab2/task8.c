@@ -91,7 +91,7 @@
     }
 
     int main() {
-        char* result = sum_numbers(16, 5, "A1", "FF", "1B3", "0", "F");
+        char* result = sum_numbers(16, 1, "A1");
         if (result) {
             printf("Результат: %s\n", result);
             free(result);

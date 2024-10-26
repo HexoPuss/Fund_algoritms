@@ -23,6 +23,7 @@ void polynomialExpansion(double epsilon, double a, double **g, int degree, ...) 
     double *f = (double *)malloc((degree + 1) * sizeof(double));
     for (int i = 0; i <= degree; i++) {
         f[i] = va_arg(args, double);
+        
     }
 
     *g = (double *)malloc((degree + 1) * sizeof(double));
@@ -30,7 +31,8 @@ void polynomialExpansion(double epsilon, double a, double **g, int degree, ...) 
     for (int i = 0; i <= degree; i++) {
         (*g)[i] = 0.0;
         for (int j = i; j <= degree; j++) {
-            (*g)[i] += f[j] * GetBinCoeff(degree, j) * pow(a, j - i);
+            
+            (*g)[i] += f[j] * GetBinCoeff(j, i) * pow(a, j - i);
         }
     }
 
@@ -43,9 +45,9 @@ int main() {
     double *g;
     int degree = 4;
     double epsilon = 0.001;
-    double a = 1.0;
+    double a = 3.0;
     
-    polynomialExpansion(epsilon, a, &g, degree, 1.0, 2.0, 3.0, 13.0, 44.0);
+    polynomialExpansion(epsilon, a, &g, degree, -2.0, 1.0, -3.0, 0.0, 1.0);
 
     printf("Коэффициенты многочлена (x - a):\n");
     for (int i = 0; i <= degree; i++) {

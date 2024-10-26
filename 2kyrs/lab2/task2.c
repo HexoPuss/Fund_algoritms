@@ -35,6 +35,6 @@ int main() {
     
     printf("Geometric mean: %f\n", geometric_mean(3, 2.0, 3.0, 4.0));
     
-    printf("Power: %f\n", power(2.0, 5));
+    printf("Power: %f\n", power(3.0, 10));
     return 0;
 }

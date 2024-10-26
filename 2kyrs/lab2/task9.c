@@ -26,16 +26,16 @@ unsigned long long getDenominator(double number) {
     if (number <= 0 || number >= 1) {
         return 0;
     }
-
+    double epsilon = 0000.1;
     unsigned long long denominator = 1;
     unsigned long long numerator = 1;
 
-    while ((int)( number * denominator) != number * denominator) {
+    while (fabs((number * denominator) - floor(number * denominator))) {
         denominator *= 10;
         
     }
 
-    numerator = (unsigned long long)(number * denominator + 0.5);
+    numerator = (unsigned long long)(number * denominator);
 
     unsigned long long divisor = gcd(numerator, denominator);
     
@@ -76,7 +76,7 @@ int checkRepresentation(int base, int n, ...){
             return 1;
         }
         
-        if (hasFiniteRepresentation(number, 3)) {
+        if (hasFiniteRepresentation(number, base)) {
             printf("Число %f имеет конечное представление в базе %d\n", number, base);
         } else {
             printf("Число %f не имеет конечного представления в базе %d\n", number, base);
@@ -89,5 +89,5 @@ int checkRepresentation(int base, int n, ...){
 }
 
 int main() {
-    checkRepresentation(10, 3, 0.123, 0.125, 0.6);
+    checkRepresentation(16, 1, 0.125);
 }
