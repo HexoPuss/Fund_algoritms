@@ -12,7 +12,6 @@ int main() {
     char filename1[MAX_FILENAME], filename2[MAX_FILENAME];
     ssize_t bytes_read;
     
-    // Получаем имена файлов
     bytes_read = read(STDIN_FILENO, filename1, MAX_FILENAME);
     if (bytes_read <= 0) {
         write(STDERR_FILENO, "Error reading filename1\n", 23);

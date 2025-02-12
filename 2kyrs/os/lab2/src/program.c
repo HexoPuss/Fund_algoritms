@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <stdarg.h>
+#include <limits.h>
+
 #define MAX_LENGTH 1000000
 
 typedef struct {
@@ -15,6 +18,61 @@ typedef struct {
     int* result_count;
     pthread_mutex_t* mutex;
 } ThreadData;
+
+
+
+void write_number_double(int fd, double num, int precision) {
+    char buffer[64];
+    int pos = 0;
+
+    // Обработка отрицательных чисел
+    if (num < 0) {
+        buffer[pos++] = '-';
+        num = -num;
+    }
+
+    // Извлечение целой части
+    long long int_part = (long long)num;
+    double fractional = num - (double)int_part;
+
+    // Преобразование целой части в строку
+    char int_buffer[32];
+    int int_pos = 0;
+    if (int_part == 0) {
+        int_buffer[int_pos++] = '0';
+    } else {
+        while (int_part > 0 && int_pos < (int)(sizeof(int_buffer) - 1)) {
+            int_buffer[int_pos++] = '0' + (int)(int_part % 10);
+            int_part /= 10;
+        }
+    }
+    // Инвертирование целой части
+    for (int i = int_pos - 1; i >= 0; i--) {
+        buffer[pos++] = int_buffer[i];
+    }
+
+    // Добавление десятичной точки
+    buffer[pos++] = '.';
+
+    // Обработка дробной части
+    for (int i = 0; i < precision; i++) {
+        fractional *= 10;
+    }
+    long long frac_part = (long long)(fractional + 0.5); // Округление
+    // Преобразование дробной части в строку с ведущими нулями
+    char frac_buffer[32];
+    int frac_pos = 0;
+    for (int i = precision - 1; i >= 0; i--) {
+        frac_buffer[i] = '0' + (frac_part % 10);
+        frac_part /= 10;
+    }
+    for (int i = 0; i < precision; i++) {
+        buffer[pos++] = frac_buffer[i];
+    }
+
+    // Отправка строки через write
+    write(fd, buffer, pos);
+}
 
 void write_number(int fd, int num) {
     char buffer[20];
@@ -64,11 +122,17 @@ int main(int argc, char* argv[]) {
     char text[MAX_LENGTH];
     int text_len = 0;
     char c;
-
+    
     while (read(0, &c, 1) > 0 && text_len < MAX_LENGTH - 1) {
         text[text_len++] = c;
     }
     text[text_len] = '\0';
+    if(strlen(text) < strlen(pattern)){
+        write(2, "Too big pattern for this text", 30);
+    }
+
+    //struct timespec start, end;
+    //clock_gettime(CLOCK_MONOTONIC, &start);
 
     int results[MAX_LENGTH];
     int result_count = 0;
@@ -105,6 +169,19 @@ int main(int argc, char* argv[]) {
     free(threads);
     free(thread_data);
     pthread_mutex_destroy(&mutex);
+
     
     return 0;
 }
+
+
+
+
+
+
+
+/*clock_gettime(CLOCK_MONOTONIC, &end);
+    double elapsed = end.tv_sec - start.tv_sec;
+    elapsed += (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+    write_number_double(1, elapsed, 6);*/
+    //write(1, "\n", 1);
